@@ -25,6 +25,9 @@ namespace Nhom7_QuanLyThuVien {
             txtMaBangCap.Text = nextMaBangCap.ToString();
             //load dữ liệu vào bảng
             BindGrid(listBANGCAPS);
+
+            lblThongtin.Text = "Hiện có " + listBANGCAPS.Count.ToString() + " bằng cấp";
+
         }
         //load dữ liệu vào bảng
         private void BindGrid(List<BANGCAP> listBANGCAPS) {
@@ -45,7 +48,7 @@ namespace Nhom7_QuanLyThuVien {
 
         }
 
-
+        //Xóa
         private void btnXoa_Click(object sender, EventArgs e) {
             try {
                 DialogResult result = MessageBox.Show("Bạn có muốn Xoá Không?", "Cảnh báo", MessageBoxButtons.YesNo, MessageBoxIcon.Warning);
@@ -55,7 +58,7 @@ namespace Nhom7_QuanLyThuVien {
                     var deleteBangCap = context.BANGCAPs.FirstOrDefault(s => s.MaBangCap == maBangCap);
 
                     if (deleteBangCap != null) {
-                        DialogResult deleteOption = MessageBox.Show("Bạn có muốn chỉ xóa tên bắng cấp không và giữ lại mã bằng cấp không ?", "Lựa chọn", MessageBoxButtons.YesNo, MessageBoxIcon.Question);
+                        DialogResult deleteOption = MessageBox.Show("Bạn có muốn chỉ xóa tên bắng cấp và giữ lại mã bằng cấp không ?", "Lựa chọn", MessageBoxButtons.YesNo, MessageBoxIcon.Question);
 
                         if (deleteOption == DialogResult.Yes) {
                             deleteBangCap.TenBangCap = ""; 
@@ -66,9 +69,11 @@ namespace Nhom7_QuanLyThuVien {
                         context.SaveChanges();
                         dgvBangCap.Rows.Clear();
 
-                        var bc = context.BANGCAPs.ToList();
-                        BindGrid(bc);
+                        listBANGCAPS = context.BANGCAPs.ToList();
+                        BindGrid(listBANGCAPS);
                         MessageBox.Show("Xóa thành công", "Thông báo");
+
+                        lblThongtin.Text = "Hiện có " + listBANGCAPS.Count + " bằng cấp";
 
                         int nextMaBangCap = listBANGCAPS.Max(b => b.MaBangCap) + 1;
                         txtMaBangCap.Text = nextMaBangCap.ToString();
@@ -85,6 +90,7 @@ namespace Nhom7_QuanLyThuVien {
                 return;
             }
         }
+        // Kiểm tra rỗng
         public bool CheckNull() {
             if (txtMaBangCap.Text == "" || txtTenBangCap.Text == "" ) { return true; }
             return false;
@@ -118,7 +124,9 @@ namespace Nhom7_QuanLyThuVien {
                     listBANGCAPS = context.BANGCAPs.ToList();
                     BindGrid(listBANGCAPS);
 
-                    MessageBox.Show("Thêm thành công Bằng cấp có mã là " + bangCap.MaBangCap + "!"); 
+                    MessageBox.Show("Thêm thành công Bằng cấp có mã là " + bangCap.MaBangCap + "!");
+
+                    lblThongtin.Text = "Hiện có " + listBANGCAPS.Count + " bằng cấp";
 
                     int nextMaBangCap = listBANGCAPS.Max(b => b.MaBangCap) + 1;
                     txtMaBangCap.Text = nextMaBangCap.ToString();
@@ -168,6 +176,7 @@ namespace Nhom7_QuanLyThuVien {
                 s.MaBangCap.ToString().IndexOf(searchStr, StringComparison.OrdinalIgnoreCase) >= 0 ||
                 s.TenBangCap.IndexOf(searchStr, StringComparison.OrdinalIgnoreCase) >= 0).ToList();
 
+            lblThongtin.Text = "Hiện có " + filteredList.Count + " bằng cấp";
             BindGrid(filteredList);
         }
 
@@ -177,7 +186,33 @@ namespace Nhom7_QuanLyThuVien {
                 MessageBox.Show("Chỉ nhập chữ!", "Thông báo", MessageBoxButtons.OK);
             }
         }
+        private void btnFilter_Click(object sender, EventArgs e) {
+            try {
+                if (string.IsNullOrEmpty(txtDau.Text) || string.IsNullOrEmpty(txtCuoi.Text)) {
+                    MessageBox.Show("Vui lòng nhập giá trị cho cả hai textbox 'txtDau' và 'txtCuoi'.");
+                    return;
+                }
 
+                int dau = int.Parse(txtDau.Text);
+                int cuoi = int.Parse(txtCuoi.Text);
 
+                List<BANGCAP> filteredList = listBANGCAPS.Where(b => b.MaBangCap >= dau && b.MaBangCap <= cuoi).ToList();
+
+                BindGrid(filteredList);
+                MessageBox.Show("Lọc thành công");
+                lblThongtin.Text = "Hiện có " + filteredList.Count + " bằng cấp";
+            } catch (Exception ex) {
+                MessageBox.Show(ex.Message);
+                return;
+            }
+        }
+
+        private void btnResetLoc_Click(object sender, EventArgs e) {
+            txtDau.Text = "";
+            txtCuoi.Text = "";
+            BindGrid(listBANGCAPS);
+            MessageBox.Show("Reset lọc");
+            lblThongtin.Text = "Hiện có " + listBANGCAPS.Count + " bằng cấp";
+        }
     }
 }
